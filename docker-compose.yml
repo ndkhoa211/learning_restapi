@@ -5,3 +5,4 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
+      - /app/.venv   # anonymous volume hides host .venv; container keeps its own

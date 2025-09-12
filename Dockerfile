@@ -1,23 +1,32 @@
+# Use Python 3.12 slim base image
 FROM python:3.12-slim
 
-EXPOSE 5000
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
+# Set environment variables
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV PYTHONUNBUFFERED=1
+
+# Set working directory
 WORKDIR /app
 
-# Install curl so we can fetch uv
-RUN apt-get update && apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/*
+# Copy dependency files first (for better caching)
+COPY pyproject.toml uv.lock* ./
 
-# Install uv (Rust-based package manager)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# Install dependencies
+RUN uv sync --frozen --no-cache --no-dev
 
-# make sure uv is on PATH (cover both locations)
-ENV PATH="/root/.local/bin:/root/.cargo/bin:${PATH}"
-
-COPY pyproject.toml uv.lock ./
-
-RUN uv sync --frozen
-
+# Copy application code
 COPY . .
 
-CMD [ "uv", "run", "flask", "run", "--host", "0.0.0.0" ]
+# Expose Flask port
+EXPOSE 5000
+
+# Set Flask environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+
+# Run the Flask application
+CMD ["uv", "run", "flask", "run", "--host", "0.0.0.0", "--port", "5000"]

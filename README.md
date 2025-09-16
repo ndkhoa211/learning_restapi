@@ -49,15 +49,22 @@ This repository documents my journey learning how to build REST APIs using Flask
 - **Input Validation**: Validated incoming data structure and types
 - **Response Formatting**: Consistent JSON response formatting
 
-### 7. Development Tools & Best Practices
+### 7. Database Migrations & Schema Management
+- **Flask-Migrate Integration**: Configured Flask-Migrate with Alembic for database schema versioning in `app.py:32`
+- **Migration Generation**: Set up automatic migration file generation with `flask db migrate`
+- **Schema Evolution**: Added description field to Item model with proper migration in `migrations/versions/7814197db9aa_.py`
+- **Version Control**: Database schema changes are now tracked and can be rolled back using Alembic migrations
+
+### 8. Development Tools & Best Practices
 - **Flask-Smorest**: Used for automatic API documentation and validation
 - **Method View Classes**: Organized endpoints using `MethodView` for cleaner code structure
 - **Error Handling**: Implemented proper error responses with meaningful messages
-- **Database Migration**: Set up automatic table creation with `db.create_all()`
+- **Database Migrations**: Replaced manual `db.create_all()` with proper migration system
 
 ## Key Technologies Used
 - **Flask**: Web framework
 - **Flask-SQLAlchemy**: ORM for database operations
+- **Flask-Migrate**: Database migration and schema versioning with Alembic
 - **Flask-Smorest**: API documentation and validation
 - **Flask-JWT-Extended**: JWT authentication
 - **Passlib**: Password hashing
@@ -74,14 +81,16 @@ This repository documents my journey learning how to build REST APIs using Flask
 8. Token refresh mechanism
 9. Fresh token requirements for sensitive operations
 10. Admin-only endpoints with custom JWT claims
+11. Database migrations with Flask-Migrate and Alembic
+12. Schema versioning and model evolution
 
 This project provided hands-on experience with modern web API development patterns and security practices.
 
 ## 🚀 Installation & Setup
 
 ### Prerequisites
-- Python 3.8 or higher
-- pip (Python package manager)
+- Python 3.12 or higher
+- uv (Python package manager) - Install from [uv.dev](https://docs.astral.sh/uv/)
 
 ### Quick Start
 ```bash
@@ -89,12 +98,30 @@ This project provided hands-on experience with modern web API development patter
 git clone <your-repo-url>
 cd learning_restapi
 
-# Install dependencies
-pip install flask flask-smorest flask-sqlalchemy flask-jwt-extended passlib
+# Create virtual environment
+uv venv
+
+# Activate virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+# Install dependencies using uv and pyproject.toml
+uv sync
 
 # Set environment variables (optional)
 export FLASK_APP=app
 export FLASK_ENV=development
+
+# Initialize database migrations (first time only)
+flask db init
+
+# Generate migration files when models change
+flask db migrate -m "description of changes"
+
+# Apply migrations to database
+flask db upgrade
 
 # Run the application
 flask run
@@ -109,11 +136,17 @@ learning_restapi/
 ├── db.py                  # Database initialization
 ├── blocklist.py          # JWT token blocklist
 ├── schemas.py            # Marshmallow schemas
+├── pyproject.toml        # Project configuration and dependencies
+├── uv.lock               # Locked dependency versions
+├── migrations/           # Database migration files (Alembic)
+│   ├── versions/        # Generated migration scripts
+│   ├── alembic.ini      # Alembic configuration
+│   └── env.py           # Migration environment setup
 ├── models/               # SQLAlchemy models
 │   ├── __init__.py
 │   ├── user.py          # User model
 │   ├── store.py         # Store model
-│   ├── item.py          # Item model
+│   ├── item.py          # Item model (with description field)
 │   ├── tag.py           # Tag model
 │   └── item_tags.py     # Many-to-many association table
 └── resources/           # API endpoints
@@ -165,3 +198,29 @@ learning_restapi/
 | DELETE | `/item/<int:item_id>/tag/<int:tag_id>` | Unlink item from tag | ❌ |
 | GET | `/tag/<int:tag_id>` | Get tag by ID | ❌ |
 | DELETE | `/tag/<int:tag_id>` | Delete tag | ❌ |
+
+## 🗄️ Database Migration Commands
+
+### Essential Flask-Migrate Commands
+```bash
+# Initialize migrations (first time setup - already done)
+flask db init
+
+# Create a new migration after model changes
+flask db migrate -m "Add description field to items"
+
+# Apply pending migrations to database
+flask db upgrade
+
+# Downgrade to previous migration (rollback)
+flask db downgrade
+
+# Show current migration status
+flask db current
+
+# Show migration history
+flask db history
+```
+
+### Recent Schema Changes
+- **Added Item Description Field**: Added optional `description` column to `items` table in migration `7814197db9aa` (models/item.py:9)

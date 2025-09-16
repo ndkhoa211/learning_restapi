@@ -28,18 +28,21 @@ This repository documents my journey learning how to build REST APIs using Flask
 - **API Documentation**: Auto-generated Swagger UI documentation at `/swagger-ui`
 
 ### 4. User Authentication & Security
-- **Password Hashing**: Used `passlib` with `pbkdf2_sha256` for secure password storage in `resources/user.py:36`
+- **Password Hashing**: Used `passlib` with `pbkdf2_sha256` for secure password storage in `resources/user.py:29`
 - **JWT Authentication**: Implemented JSON Web Tokens using Flask-JWT-Extended
 - **Protected Endpoints**: Added `@jwt_required()` decorator to secure API endpoints
 - **Token Management**:
-  - Login endpoint generates access tokens at `resources/user.py:53`
-  - Logout endpoint adds tokens to blocklist for revocation at `resources/user.py:23`
-  - Token expiration and validation handlers in `app.py:61-87`
+  - Login endpoint generates both access and refresh tokens at `resources/user.py:46-47`
+  - Logout endpoint adds tokens to blocklist for revocation at `resources/user.py:58`
+  - Refresh endpoint allows token renewal at `resources/user.py:67`
+  - Token expiration and validation handlers in `app.py:73-99`
 
 ### 5. Advanced JWT Features
-- **Custom Claims**: Added admin privileges based on user ID in `app.py:55`
+- **Custom Claims**: Added admin privileges based on user ID in `app.py:69-71`
 - **Token Blocklist**: Implemented token revocation system using in-memory blocklist
-- **Comprehensive Error Handling**: Created handlers for expired, invalid, and missing tokens
+- **Fresh Tokens**: Implemented fresh token requirement for sensitive operations like creating items
+- **Refresh Tokens**: Added token refresh mechanism for seamless authentication renewal
+- **Comprehensive Error Handling**: Created handlers for expired, invalid, missing, and revoked tokens
 
 ### 6. API Validation & Serialization
 - **Marshmallow Schemas**: Used schemas for request/response validation and serialization
@@ -68,6 +71,9 @@ This repository documents my journey learning how to build REST APIs using Flask
 5. JWT token-based security
 6. Protected endpoints and authorization
 7. Token management (logout/revocation)
+8. Token refresh mechanism
+9. Fresh token requirements for sensitive operations
+10. Admin-only endpoints with custom JWT claims
 
 This project provided hands-on experience with modern web API development patterns and security practices.
 
@@ -123,8 +129,9 @@ learning_restapi/
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | POST | `/register` | Register a new user | ❌ |
-| POST | `/login` | Login and get access token | ❌ |
+| POST | `/login` | Login and get access & refresh tokens | ❌ |
 | POST | `/logout` | Logout and revoke token | ✅ |
+| POST | `/refresh` | Refresh access token using refresh token | ✅ (Refresh token) |
 
 ### User Management (Development Only)
 | Method | Endpoint | Description | Auth Required |
@@ -144,7 +151,7 @@ learning_restapi/
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | GET | `/item` | Get all items | ✅ |
-| POST | `/item` | Create a new item | ✅ |
+| POST | `/item` | Create a new item | ✅ (Fresh token) |
 | GET | `/item/<int:item_id>` | Get item by ID | ✅ |
 | PUT | `/item/<int:item_id>` | Update item | ❌ |
 | DELETE | `/item/<int:item_id>` | Delete item | ✅ (Admin only) |

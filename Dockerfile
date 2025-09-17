@@ -21,12 +21,9 @@ RUN uv sync --frozen --no-cache --no-dev
 # Copy application code
 COPY . .
 
-# Expose Flask port
-EXPOSE 5000
-
 # Set Flask environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
 # Run the Flask application
-CMD ["uv", "run", "flask", "run", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["uv", "run", "gunicorn", "--bind", "0.0.0.0:80", "app:create_app()"]

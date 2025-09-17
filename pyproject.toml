@@ -10,6 +10,7 @@ dependencies = [
     "flask-migrate>=4.1.0",
     "flask-smorest>=0.46.2",
     "flask-sqlalchemy>=3.1.1",
+    "gunicorn>=23.0.0",
     "passlib>=1.7.4",
     "python-dotenv>=1.1.1",
     "sqlalchemy>=2.0.43",

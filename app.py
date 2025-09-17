@@ -31,6 +31,9 @@ def create_app(db_url=None):
     db.init_app(app)
     migrate = Migrate(app, db)
 
+    with app.app_context():
+        db.create_all()
+
     api = Api(app)
 
     #app.config["JWT_SECRET_KEY"] = secrets.SystemRandom().getrandbits(128)
